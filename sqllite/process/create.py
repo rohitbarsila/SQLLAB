@@ -45,10 +45,17 @@ def input_command(user,command):
     conn = sqlite3.connect('Database/'+str(user)+'.db')
     cur = conn.cursor()
     cur.execute(command)
+    conn.commit()
     rows = cur.fetchall()
-    for row in rows:
-        print(row)
-    return rows
+    header=cur.description
+    head=[]
+    cur.close()
+    try:
+        for l in header:
+            head.append(l[0])
+    except:
+        pass
+    return rows,head
 
 def reset(user):
     if os.path.exists('Database/' + str(user) + '.db'):
@@ -76,6 +83,7 @@ class DataP(APIView):
             elif "command" in request.data:
                 command=data["command"]
                 output=input_command(request.user,command)
-                return Response({"Status":"Sucess","Output":output})
+                print(output)
+                return Response({"Status":"Sucess","Header":output[1],"Output":output[0]})
             else:
                 return Response({"Status": "Error", "Message": "Command Not Found" })
